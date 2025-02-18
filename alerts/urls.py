@@ -1,7 +1,8 @@
 from django.urls import path
-from .views import check_network_status, handle_telex_json
+from . import views
 
 urlpatterns = [
-    path("check/", check_network_status, name="check_network"),
-    path("telex-json/", handle_telex_json, name="handle_telex_json"),
+    path('check/', views.check_network_status, name='check_status'),
+    path('configure/', views.configure_webhook, name='configure_webhook'),
+    path('json/', views.handle_telex_json, name='telex_json'),
 ]

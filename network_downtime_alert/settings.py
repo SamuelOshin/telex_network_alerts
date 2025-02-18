@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 import os
 
+from django.conf import settings
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -124,10 +126,7 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CELERY_BROKER_URL = 'redis://localhost:6379/0'  # Use Redis as the broker
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
 
 # Load Telex webhook from environment variables
 TELEX_WEBHOOK_URL = os.getenv("TELEX_WEBHOOK_URL", "https://ping.telex.im/v1/webhooks/0195149e-7ff1-7e9d-b08e-8793e1b61746")
-TARGET_URL = os.getenv("TARGET_URL", "https://telex-network-alerts.onrender.com/")
+TARGET_URL = getattr(settings, 'TARGET_URL', 'https://telex-network-alerts.onrender.com/alerts/check')

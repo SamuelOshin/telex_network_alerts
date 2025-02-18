@@ -16,7 +16,13 @@ TARGET_URL = settings.TARGET_URL
 last_known_state = {"status": "unknown", "last_check": None}
 
 def check_network_status(request):
-    """Attempt a socket connection instead of using ping."""
+    """Attempt a socket connection instead of ping."""
+    if not hasattr(settings, 'TARGET_URL'):
+        return JsonResponse({
+            "status": "error",
+            "message": "Target URL not configured"
+        }, status=400)
+    
     global last_known_state
     current_time = datetime.now()
     
@@ -93,8 +99,8 @@ def handle_telex_json(request):
                     "descriptions": {
                         "app_name": "Network Downtime Alerts",
                         "app_description": "Checks network connectivity at intervals, sends alerts on downtime.",
-                        "app_logo": "https://telex-network-alerts.onrender.com",
-                        "app_url": "https://telex-network-alerts.onrender.com/alerts/check",
+                        "app_logo": "https://img.freepik.com/free-vector/automatic-backup-abstract-concept-illustration_335657-1834.jpg?t=st=1739910156~exp=1739913756~hmac=430c269845ae9683d5f93884d28ef5b053169b5a8ddab1d7f49f212e34f0af52&w=740",
+                        "app_url": "https://telex-network-alerts.onrender.com",
                         "background_color": "#fff"
                     },
                     "is_active": True,
@@ -115,7 +121,13 @@ def handle_telex_json(request):
                     "integration_type": "interval",
                     "settings": [
                         {
-                            "label": "interval",
+                            "label": "Webhook URL",
+                            "type": "text",
+                            "required": True,
+                            "default": "https://example.com/webhook"
+                        },
+                        {
+                            "label": "Set Interval Time (Cron Expression)",
                             "type": "text",
                             "required": True,
                             "default": "* * * * *"
@@ -126,8 +138,48 @@ def handle_telex_json(request):
                             "required": True,
                             "default": "Yes"
                         },
+                        {
+                            "label": "Target URL",
+                            "type": "text",
+                            "key": "target_url",  # Add a key for identification
+                            "required": True,
+                            "default": "https://example.com"
+                        }
                     ],
                     "tick_url": "https://telex-network-alerts.onrender.com/alerts/check"
                 }
             }
         )
+
+@csrf_exempt
+def configure_webhook(request):
+    """Handle webhook configuration from Telex."""
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            target_url = data.get('target_url')
+            
+            if not target_url:
+                return JsonResponse({
+                    "status": "error",
+                    "message": "Target URL is required"
+                }, status=400)
+            
+            # Store the target URL in settings
+            settings.TARGET_URL = target_url
+            
+            return JsonResponse({
+                "status": "success",
+                "message": "Webhook configured successfully"
+            })
+            
+        except json.JSONDecodeError:
+            return JsonResponse({
+                "status": "error",
+                "message": "Invalid JSON data"
+            }, status=400)
+    
+    return JsonResponse({
+        "status": "error",
+        "message": "Method not allowed"
+    }, status=405)
