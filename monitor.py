@@ -1,7 +1,7 @@
 import time
 import requests
 
-CHECK_URL = "https://your-render-app.onrender.com/check/"
+CHECK_URL = "https://telex-network-alerts.onrender.com/alerts/check/"
 
 while True:
     try:
