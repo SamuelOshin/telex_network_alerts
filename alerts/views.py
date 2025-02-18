@@ -65,6 +65,7 @@ def handle_telex_json(request):
                     }
                     },
                     "author": "Bobbysam",
+                    "integration_category": "Monitoring",
                     "settings": [
                         {
                             "label": "interval",
