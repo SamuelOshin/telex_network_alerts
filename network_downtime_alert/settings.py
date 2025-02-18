@@ -130,3 +130,4 @@ CELERY_TASK_SERIALIZER = 'json'
 
 # Load Telex webhook from environment variables
 TELEX_WEBHOOK_URL = os.getenv("TELEX_WEBHOOK_URL", "https://ping.telex.im/v1/webhooks/0195149e-7ff1-7e9d-b08e-8793e1b61746")
+TARGET_URL = os.getenv("TARGET_URL", "https://telex-network-alerts.onrender.com/")

@@ -6,27 +6,57 @@ from django.http import JsonResponse
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 import json
+from functools import lru_cache
+from datetime import datetime
+from urllib.parse import urlparse
 
-TARGET_URL = "192.168.1.1"  # Change to your actual server IP
+TARGET_URL = settings.TARGET_URL
+
+# Add this variable to track last known state
+last_known_state = {"status": "unknown", "last_check": None}
 
 def check_network_status(request):
     """Attempt a socket connection instead of using ping."""
+    global last_known_state
+    current_time = datetime.now()
+    
     try:
+        # Parse the URL to get the hostname
+        parsed_url = urlparse(TARGET_URL)
+        hostname = parsed_url.netloc or parsed_url.path
+        port = 443 if parsed_url.scheme == 'https' else 80
+        
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.settimeout(2)
-        s.connect((TARGET_URL, 80))
+        s.connect((hostname, port))
         s.close()
+        
+        # Check if status was previously down and now up (restored)
+        if last_known_state["status"] == "down":
+            send_telex_alert(
+                "Network Restored", 
+                f"Connection to {TARGET_URL} has been restored",
+                status="success"
+            )
+        
+        last_known_state = {"status": "up", "last_check": current_time}
         return JsonResponse({"status": "up", "message": f"Reached {TARGET_URL}"}, status=200)
+    
     except Exception as e:
-        send_telex_alert("Network Down", f"Failed to reach {TARGET_URL}")
+        last_known_state = {"status": "down", "last_check": current_time}
+        send_telex_alert(
+            "Network Down", 
+            f"Failed to reach {TARGET_URL}",
+            status="error"
+        )
         return JsonResponse({"status": "down", "message": f"Failed to reach {TARGET_URL}"}, status=503)
 
-def send_telex_alert(title, message):
+def send_telex_alert(title, message, status="error"):
     """Send a real-time alert to Telex."""
     payload = {
         "event_name": title,
         "message": message,
-        "status": "error",
+        "status": status,  # Now accepts status as parameter
         "username": "Bobbysam"
     }
     headers = {
@@ -39,7 +69,6 @@ def send_telex_alert(title, message):
         response_data = resp.json()
         print(f"Response body: {response_data}")
         
-        # Consider 202 as success since that's what Telex returns
         if resp.status_code in [200, 202]:
             print(f"Alert sent to Telex successfully. Task ID: {response_data.get('task_id')}")
             return True
