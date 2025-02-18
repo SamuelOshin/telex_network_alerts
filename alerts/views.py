@@ -23,15 +23,32 @@ def check_network_status(request):
 
 def send_telex_alert(title, message):
     """Send a real-time alert to Telex."""
-    payload = {"title": title, "message": message}
-    headers = {"Content-Type": "application/json"}
+    payload = {
+        "event_name": title,
+        "message": message,
+        "status": "error",
+        "username": "Bobbysam"
+    }
+    headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json"
+    }
     try:
         resp = requests.post(settings.TELEX_WEBHOOK_URL, json=payload, headers=headers)
-        if resp.status_code == 200:
-            # Telex received OK
-            pass
+        print(f"Response status: {resp.status_code}")
+        response_data = resp.json()
+        print(f"Response body: {response_data}")
+        
+        # Consider 202 as success since that's what Telex returns
+        if resp.status_code in [200, 202]:
+            print(f"Alert sent to Telex successfully. Task ID: {response_data.get('task_id')}")
+            return True
+        else:
+            print(f"Telex returned unexpected status code: {resp.status_code}")
+            return False
     except requests.exceptions.RequestException as e:
-        print("Failed to send alert to Telex:", e)
+        print(f"Failed to send alert to Telex: {str(e)}")
+        return False
 
 @csrf_exempt
 def handle_telex_json(request):
@@ -66,6 +83,7 @@ def handle_telex_json(request):
                     },
                     "author": "Bobbysam",
                     "integration_category": "Monitoring",
+                    "integration_type": "interval",
                     "settings": [
                         {
                             "label": "interval",

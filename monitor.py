@@ -10,4 +10,4 @@ while True:
     except Exception as e:
         print("Error:", e)
     
-    time.sleep(300)  # Run every 5 minutes
+    time.sleep(60)  # Run every 60 seconds
