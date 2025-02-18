@@ -117,7 +117,7 @@ def handle_telex_json(request):
                     }
                     },
                     "author": "Bobbysam",
-                    "integration_category": "Monitoring",
+                    "integration_category": "Monitoring & Logging",
                     "integration_type": "interval",
                     "settings": [
                         {
