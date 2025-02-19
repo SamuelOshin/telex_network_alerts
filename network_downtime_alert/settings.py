@@ -133,7 +133,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Load Telex webhook from environment variables
 TELEX_WEBHOOK_URL = os.getenv("TELEX_WEBHOOK_URL", "https://ping.telex.im/v1/webhooks/0195149e-7ff1-7e9d-b08e-8793e1b61746")
-TARGET_URL = getattr(settings, 'TARGET_URL', '192.168.1.1')
+TARGET_URL = getattr(settings, 'TARGET_URL', '192.168.0.1')
 
 CORS_ALLOWED_ORIGINS = [
     "https://telex.im",
