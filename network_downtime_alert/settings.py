@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'alerts',  
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -130,3 +131,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Load Telex webhook from environment variables
 TELEX_WEBHOOK_URL = os.getenv("TELEX_WEBHOOK_URL", "https://ping.telex.im/v1/webhooks/0195149e-7ff1-7e9d-b08e-8793e1b61746")
 TARGET_URL = getattr(settings, 'TARGET_URL', 'https://telex-network-alerts.onrender.com/alerts/check')
+MIDDLEWARE.insert(1, 'corsheaders.middleware.CorsMiddleware')
+CORS_ALLOW_ALL_ORIGINS = True  
