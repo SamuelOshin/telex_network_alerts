@@ -9,12 +9,15 @@ import json
 from functools import lru_cache
 from datetime import datetime
 from urllib.parse import urlparse
+from django.views.decorators.http import require_http_methods
 
 TARGET_URL = settings.TARGET_URL
 
 # Add this variable to track last known state
 last_known_state = {"status": "unknown", "last_check": None}
 
+@csrf_exempt
+@require_http_methods(["GET", "POST"])
 def check_network_status(request):
     """Attempt a socket connection instead of ping."""
     if not hasattr(settings, 'TARGET_URL'):
@@ -86,6 +89,7 @@ def send_telex_alert(title, message, status="error"):
         return False
 
 @csrf_exempt
+@require_http_methods(["GET", "POST"])
 def handle_telex_json(request):
     """Handle Returning Telex JSON."""
     if request.method == "GET":
