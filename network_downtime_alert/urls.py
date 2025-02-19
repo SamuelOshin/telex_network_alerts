@@ -16,8 +16,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from alerts.views import check_network_status
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('tick', check_network_status, name='check_status'),
     path("alerts/", include("alerts.urls")),
 ]

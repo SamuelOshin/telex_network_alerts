@@ -133,7 +133,7 @@ def handle_telex_json(request):
                             "default": "* * * * *"
                         },
                     ],
-                    "tick_url": "https://telex-network-alerts.onrender.com/alerts/check",
+                    "tick_url": "https://telex-network-alerts.onrender.com/tick",
                     "target_url": ""
                 }
             }
