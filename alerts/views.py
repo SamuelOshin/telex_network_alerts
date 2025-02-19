@@ -120,8 +120,8 @@ def handle_telex_json(request):
                     "integration_category": "Monitoring & Logging",
                     "integration_type": "interval",
                     "settings": [
-                    {"label": "Target URL", "type": "text", "required": True, "default": ""},
-                    {"label": "Interval", "type": "text", "required": True, "default": "* * * * *"},
+                        {"label": "Target URL", "type": "text", "required": True, "default": ""},
+                        {"label": "Interval", "type": "text", "required": True, "default": "* * * * *"},
                     ],
                     "tick_url": "https://telex-network-alerts.onrender.com/alerts/check",
                     "target_url": "https://telex-network-alerts.onrender.com/alerts/check"
