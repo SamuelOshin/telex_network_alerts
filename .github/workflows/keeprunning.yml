@@ -11,3 +11,4 @@ jobs:
     steps:
       - name: Ping API to Keep It Alive
         run: curl -s -o /dev/null -w "%{http_code}" "${{ secrets.API_URL }}"
+        
