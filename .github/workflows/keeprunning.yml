@@ -1,12 +1,13 @@
-name: Keep Render API Running
+name: Keep API Alive
 
 on:
   schedule:
-    - cron: '*/10 * * * *'
+    - cron: "*/10 * * * *"
 
 jobs:
   keep-alive:
-   runs-on: ubuntu-latest
-   steps:
-    -name: Ping API to Keep It Alive
-    run: curl -s -o /dev/null -w "%{http_code}" "${{ secrets.API_URL }}/" 
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Ping API to Keep It Alive
+        run: curl -s -o /dev/null -w "%{http_code}" "${{ secrets.API_URL }}"
