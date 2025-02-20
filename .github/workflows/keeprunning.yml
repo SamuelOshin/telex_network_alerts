@@ -1,0 +1,17 @@
+name: Keep Render API Running
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+
+jobs:
+  keep-alive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping API to Keep It Alive
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" "${{ secrets.API_URL }}/" -m 5)
+          if [ "$response" != "200" ]; then
+            echo "API returned non-200 status: $response"
+            exit 1
+          fi
