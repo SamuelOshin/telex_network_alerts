@@ -10,6 +10,7 @@ from functools import lru_cache
 from datetime import datetime
 from urllib.parse import urlparse
 from django.views.decorators.http import require_http_methods
+import validators
 
 TARGET_URL = settings.TARGET_URL
 
@@ -92,6 +93,7 @@ def send_telex_alert(title, message, status="error"):
 @require_http_methods(["GET", "POST"])
 def handle_telex_json(request):
     """Handle Returning Telex JSON."""
+    base_url = request.build_absolute_uri('/').rstrip('/')
     if request.method == "GET":
         return JsonResponse(
             {
@@ -104,7 +106,7 @@ def handle_telex_json(request):
                         "app_name": "Network Downtime Alerts",
                         "app_description": "Checks network connectivity at intervals, sends alerts on downtime.",
                         "app_logo": "https://img.freepik.com/free-vector/automatic-backup-abstract-concept-illustration_335657-1834.jpg?t=st=1739910156~exp=1739913756~hmac=430c269845ae9683d5f93884d28ef5b053169b5a8ddab1d7f49f212e34f0af52&w=740",
-                        "app_url": "https://telex-network-alerts.onrender.com",
+                        "app_url": base_url,
                         "background_color": "#fff"
                     },
                     "is_active": True,
@@ -125,10 +127,12 @@ def handle_telex_json(request):
                     "integration_type": "interval",
                     "settings": [
                         {
-                            "label": "Webhook URL",
+                            "label": "Target URL to Monitor",
+                            "key": "target_url",
                             "type": "text",
                             "required": True,
-                            "default": "https://example.com/webhook"
+                            "default": "https://your-server-url.com",
+                            "description": "The URL of the server you want to monitor for downtime"
                         },
                         {
                             "label": "interval",
@@ -137,7 +141,7 @@ def handle_telex_json(request):
                             "default": "* * * * *"
                         },
                     ],
-                    "tick_url": "https://telex-network-alerts.onrender.com/tick",
+                    "tick_url": f"{base_url}/tick",
                     "target_url": ""
                 }
             }
@@ -151,18 +155,27 @@ def configure_webhook(request):
             data = json.loads(request.body)
             target_url = data.get('target_url')
             
-            if not target_url:
+            # Validate URL format
+            if not validators.url(target_url):
                 return JsonResponse({
                     "status": "error",
-                    "message": "Target URL is required"
+                    "message": "Invalid URL format"
                 }, status=400)
             
-            # Store the target URL in settings
-            settings.TARGET_URL = target_url
+            # Test connection
+            try:
+                response = requests.head(target_url, timeout=5)
+                response.raise_for_status()
+            except requests.RequestException:
+                return JsonResponse({
+                    "status": "error",
+                    "message": "Could not connect to target URL"
+                }, status=400)
             
+            settings.TARGET_URL = target_url
             return JsonResponse({
                 "status": "success",
-                "message": "Webhook configured successfully"
+                "message": "Target URL configured successfully"
             })
             
         except json.JSONDecodeError:
