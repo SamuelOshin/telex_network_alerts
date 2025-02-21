@@ -131,9 +131,11 @@ def handle_telex_json(request):
                         },
                         {
                             "label": "interval",
-                            "type": "text",
+                            "type": "dropdown",
                             "required": True,
                             "default": "* * * * *"
+                            "options": ["* * * * *", "*/5 * * * *", "*/10 * * * *", "*/15 * * * *", "*/30 * * * *", "0 * * * *", "0 */2 * * *", "0 */4 * * *", "0 */6 * * *", "0 */12 * * *"]
+                            "description": "The interval to check the server for downtime"
                         },
                     ],
                     "tick_url": f"{base_url}/tick",
