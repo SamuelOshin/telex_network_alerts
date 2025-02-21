@@ -21,18 +21,13 @@ last_known_state = {"status": "unknown", "last_check": None}
 @require_http_methods(["GET", "POST"])
 def check_network_status(request):
     """Attempt a socket connection instead of ping."""
-    if not hasattr(settings, 'TARGET_URL'):
-        return JsonResponse({
-            "status": "error",
-            "message": "Target URL not configured"
-        }, status=400)
-    
     global last_known_state
     current_time = datetime.now()
     
     try:
-        # Parse the URL to get the hostname
-        parsed_url = urlparse(TARGET_URL)
+        # Use the dynamically set TARGET_URL
+        target_url = settings.TARGET_URL
+        parsed_url = urlparse(target_url)
         hostname = parsed_url.netloc or parsed_url.path
         port = 443 if parsed_url.scheme == 'https' else 80
         
@@ -45,21 +40,21 @@ def check_network_status(request):
         if last_known_state["status"] == "down":
             send_telex_alert(
                 "Network Restored", 
-                f"Connection to {TARGET_URL} has been restored",
+                f"Connection to {target_url} has been restored",
                 status="success"
             )
         
         last_known_state = {"status": "up", "last_check": current_time}
-        return JsonResponse({"status": "up", "message": f"Reached {TARGET_URL}"}, status=200)
+        return JsonResponse({"status": "up", "message": f"Reached {target_url}"}, status=200)
     
     except Exception as e:
         last_known_state = {"status": "down", "last_check": current_time}
         send_telex_alert(
             "Network Down", 
-            f"Failed to reach {TARGET_URL}",
+            f"Failed to reach {target_url}",
             status="error"
         )
-        return JsonResponse({"status": "down", "message": f"Failed to reach {TARGET_URL}"}, status=503)
+        return JsonResponse({"status": "down", "message": f"Failed to reach {target_url}"}, status=503)
 
 def send_telex_alert(title, message, status="error"):
     """Send a real-time alert to Telex."""
