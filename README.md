@@ -51,7 +51,7 @@ This application monitors network connectivity by periodically checking the avai
   ```
 
 ### 2. Handle Telex JSON
-- **Endpoint:** `/handle_telex_json/`
+- **Endpoint:** `/alerts/integration.json`
 - **Methods:** `GET`
 - **Description:** Returns JSON metadata for Telex integration.
 
