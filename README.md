@@ -10,7 +10,7 @@ This application monitors network connectivity by periodically checking the avai
 - Lightweight solution without a database.
 
 ## Requirements
-- Python 3.11+
+- Python 3.8+
 - Django
 - `requests` library
 - A valid Telex webhook URL
@@ -42,7 +42,7 @@ This application monitors network connectivity by periodically checking the avai
 
 ## API Endpoints
 ### 1. Check Network Status
-- **Endpoint:** `/tick`
+- **Endpoint:** `/alerts/check/`
 - **Methods:** `GET`, `POST`
 - **Description:** Checks connectivity to the target URL and updates the status.
 - **Response:**
@@ -56,7 +56,7 @@ This application monitors network connectivity by periodically checking the avai
 - **Description:** Returns JSON metadata for Telex integration.
 
 ### 3. Configure Webhook
-- **Endpoint:** `/configure_webhook/`
+- **Endpoint:** `/alerts/configure/`
 - **Methods:** `POST`
 - **Description:** Allows dynamic configuration of the target URL.
 - **Request Body:**
@@ -75,6 +75,58 @@ This application monitors network connectivity by periodically checking the avai
 - **Functionality:** The cron job will call this endpoint based on the specified schedule to ensure periodic network status checks.
 - **Implementation:** The `/tick/` endpoint executes `check_network_status`, ensuring continuous monitoring. The cron job should be configured to hit this endpoint at the desired interval to automate the network status verification process.
 
+## Testing the Integration
+To test the integration, you can use **Postman** or `curl` to send requests to the API endpoints:
+
+### Using Postman:
+1. **Open Postman** and create a new request.
+2. **Select `POST`** as the request type.
+3. **Enter the URL**:
+   ```
+   https://telex-network-alerts.onrender.com/alerts/configure/
+   ```
+4. **Go to the "Headers" tab** and add:
+   - **Key:** `Content-Type`
+   - **Value:** `application/json`
+5. **Go to the "Body" tab**:
+   - Select **raw**
+   - Choose **JSON**
+   - Enter the following JSON data:
+     ```json
+     {
+       "target_url": "https://example.com"
+     }
+     ```
+6. **Click "Send"** to execute the request.
+7. **Expected Response:**
+   ```json
+   {
+     "status": "success",
+     "message": "Target URL configured successfully"
+   }
+   ```
+
+### Using `curl`:
+To test using `curl`, run the following command:
+```sh
+curl -X POST "https://telex-network-alerts.onrender.com/alerts/configure/" \
+     -H "Content-Type: application/json" \
+     -d '{"target_url": "https://example.com"}'
+```
+
+### Checking Network Status
+To manually check the network status, send a `GET` request to:
+```sh
+curl -X GET "https://telex-network-alerts.onrender.com/alerts/check/"
+```
+**Expected Response:**
+```json
+{
+  "status": "up",
+  "message": "Reached https://your-server-url.com"
+}
+```
+
 ## Deployment
 For production deployment, configure a WSGI server like Gunicorn:
 ```sh
@@ -84,9 +136,6 @@ Run the server:
 ```sh
 gunicorn --bind 0.0.0.0:8000 project.wsgi:application
 ```
-
-## License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Author
 - **Name:** Bobbysam
